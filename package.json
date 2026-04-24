@@ -1,0 +1,21 @@
+{
+  "name": "shushlink",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Zero-backend, zero-knowledge secret sharing. The secret lives in the URL fragment; the server never sees it.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "hash-wasm": "^4.11.0",
+    "qrcode-generator": "^1.4.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  }
+}
