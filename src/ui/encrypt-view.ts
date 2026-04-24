@@ -1,4 +1,4 @@
-import { encryptSecret } from '../crypto';
+import { encryptSecret, estimatedTotalUrlLength } from '../crypto';
 import { generatePassword } from '../password';
 import { renderQrSvg } from '../qr';
 import { t } from '../i18n';
@@ -48,6 +48,14 @@ export function renderEncryptView(root: HTMLElement): void {
   autoCheckbox.addEventListener('change', refreshAutoState);
   refreshAutoState();
 
+  const counter = el('small', { class: 'counter' }, [t('encrypt.urlCounter').replace('{n}', '0')]);
+  const updateCounter = () => {
+    const n = secret.value ? estimatedTotalUrlLength(secret.value) : 0;
+    counter.textContent = t('encrypt.urlCounter').replace('{n}', String(n));
+    counter.classList.toggle('counter-warn', n > URL_WARN_LEN);
+  };
+  secret.addEventListener('input', updateCounter);
+
   const submit = el('button', { type: 'submit', class: 'btn btn-primary' }, [t('encrypt.button')]);
   const error = el('div', { class: 'error', role: 'alert' });
   const result = el('div', { class: 'result hidden' });
@@ -86,6 +94,7 @@ export function renderEncryptView(root: HTMLElement): void {
       el('p', { class: 'card-sub' }, [t('app.tagline')]),
       el('label', { class: 'label', htmlFor: 'secret' }, [t('encrypt.secret.label')]),
       secret,
+      counter,
       el('label', { class: 'label', htmlFor: 'password' }, [t('encrypt.password.label')]),
       passwordInput,
       el('label', { class: 'check' }, [
@@ -99,6 +108,7 @@ export function renderEncryptView(root: HTMLElement): void {
 
   root.appendChild(form);
   root.appendChild(result);
+  secret.focus();
 }
 
 function renderResult(container: HTMLElement, link: string, password: string): void {

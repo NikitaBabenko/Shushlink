@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "hash-wasm": "^4.11.0",
@@ -16,6 +18,8 @@
   },
   "devDependencies": {
     "typescript": "^5.4.5",
-    "vite": "^5.2.11"
+    "vite": "^5.2.11",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^4.1.5"
   }
 }

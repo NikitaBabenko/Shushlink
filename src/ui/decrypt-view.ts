@@ -15,6 +15,27 @@ export function renderDecryptView(root: HTMLElement): void {
     class: 'field',
   });
 
+  const togglePw = el(
+    'button',
+    {
+      type: 'button',
+      class: 'toggle-pw',
+      title: t('decrypt.password.show'),
+      'aria-label': t('decrypt.password.show'),
+    },
+    ['👁']
+  );
+  togglePw.addEventListener('click', () => {
+    const showing = password.type === 'text';
+    password.type = showing ? 'password' : 'text';
+    const label = showing ? t('decrypt.password.show') : t('decrypt.password.hide');
+    togglePw.title = label;
+    togglePw.setAttribute('aria-label', label);
+    togglePw.textContent = showing ? '👁' : '🚫';
+    password.focus();
+  });
+  const passwordRow = el('div', { class: 'row row-tight' }, [password, togglePw]);
+
   const submit = el('button', { type: 'submit', class: 'btn btn-primary' }, [t('decrypt.button')]);
   const error = el('div', { class: 'error', role: 'alert' });
   const result = el('div', { class: 'result hidden' });
@@ -54,7 +75,7 @@ export function renderDecryptView(root: HTMLElement): void {
       el('h1', { class: 'card-title' }, [t('decrypt.title')]),
       el('p', { class: 'card-sub' }, [t('decrypt.subtitle')]),
       el('label', { class: 'label', htmlFor: 'password' }, [t('decrypt.password.label')]),
-      password,
+      passwordRow,
       submit,
       error,
     ]

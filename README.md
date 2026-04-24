@@ -39,7 +39,7 @@ secret + password
 - **Salt:** 16 bytes from `crypto.getRandomValues`
 - **IV:** 12 bytes from `crypto.getRandomValues`
 - **Encoding:** base64url, no padding
-- **Format:** `v1.<base64url(salt ‖ iv ‖ ciphertext)>` — versioned so KDF parameters can evolve safely
+- **Format:** `v1.<base64url(memSize_LE16 ‖ iters ‖ parallelism ‖ salt ‖ iv ‖ ciphertext+tag)>` — KDF parameters travel with the payload (4-byte header), so future links produced with stronger parameters decrypt without bumping the version
 
 ---
 
@@ -70,6 +70,27 @@ Built for one-click deploy on [VibeNest](https://vibenest.net/) — paste the re
 - No external scripts, fonts, or trackers. No analytics. No cookies.
 - The recipient must paste the password manually — it is never carried in the URL.
 - "One-time view" is **not** offered, because it requires server-side state and would invalidate the zero-backend property. If you close the tab, the secret is gone from your machine; the link itself can still be decrypted by anyone who has both it and the password.
+
+---
+
+## Threat model
+
+**What Shushlink protects against**
+
+- Compromised hosting provider — the server only ever sees a static HTML response; the secret never leaves the sender's browser
+- Network observers, TLS-terminating proxies, CDNs — the fragment is never sent in any HTTP request
+- Server logs, access logs, `Referer` headers, analytics — same reason
+- Casual link sharing without the password — link alone is useless without the password
+- Clickjacking — `frame-ancestors 'none'` in the production CSP plus a JS frame-bust at boot
+- XSS via injected scripts — strict CSP (`default-src 'none'`, no `connect-src`, no `img-src` to remote origins)
+
+**What Shushlink does NOT protect against**
+
+- Weak passwords — Argon2id raises the cost per guess, but a 6-character password still falls. Use the auto-generated 24-character default
+- Compromised endpoints — malicious browser extensions, OS keyloggers, and screen recorders can read the plaintext directly
+- Quantum adversaries — AES-256 retains ~128-bit security against Grover's algorithm; that's still adequate for short-lived secrets, but a forward-secure design this is not
+- Coercion / rubber-hose cryptanalysis
+- Anyone who has BOTH the link AND the password — Shushlink is a transport, not a permissions system. There is no revocation, no "view once," no expiry, because there is no backend to enforce them
 
 ---
 

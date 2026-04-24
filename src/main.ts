@@ -21,7 +21,22 @@ function renderFooter(root: HTMLElement): void {
   );
 }
 
+function bustFrame(): boolean {
+  if (window.top !== window.self) {
+    document.body.textContent = '';
+    try {
+      if (window.top) window.top.location.href = window.self.location.href;
+    } catch {
+      /* cross-origin top — at least we already cleared the body */
+    }
+    return true;
+  }
+  return false;
+}
+
 function bootstrap(): void {
+  if (bustFrame()) return;
+
   const app = document.getElementById('app');
   const footer = document.getElementById('footer');
   if (!app || !footer) throw new Error('missing root nodes');
