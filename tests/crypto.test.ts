@@ -91,6 +91,31 @@ describe('crypto', () => {
     expect(decrypted).toBe('migrated secret');
   });
 
+  it('rejects payload shorter than header + salt + iv + tag', async () => {
+    // 4 + 16 + 12 + 16 = 48 bytes minimum; build a 47-byte payload
+    const tooShort = new Uint8Array(47);
+    tooShort[0] = 1; tooShort[2] = 1; tooShort[3] = 1; // valid-looking header
+    const fragment = 'v1.' + Buffer.from(tooShort).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    await expect(decryptSecret(fragment, 'pw')).rejects.toThrow(/too short/);
+  });
+
+  it('rejects header with zero KDF params', async () => {
+    // Construct payload with header [0,0,0,0] but otherwise plausible length
+    const payload = new Uint8Array(4 + 16 + 12 + 16);
+    const fragment = 'v1.' + Buffer.from(payload).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    await expect(decryptSecret(fragment, 'pw')).rejects.toThrow(/invalid kdf params/);
+  });
+
+  it('rejects header with KDF params above safe upper bound', async () => {
+    // memorySize=1 (ok), iterations=255 (over MAX=10), parallelism=1
+    const payload = new Uint8Array(4 + 16 + 12 + 16);
+    payload[0] = 1; payload[1] = 0;
+    payload[2] = 255;
+    payload[3] = 1;
+    const fragment = 'v1.' + Buffer.from(payload).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    await expect(decryptSecret(fragment, 'pw')).rejects.toThrow(/upper bound/);
+  });
+
   it('estimatedFragmentLength matches actual fragment length within rounding', async () => {
     const plaintext = 'predictable length test';
     const fragment = await encryptSecret(plaintext, 'pw', FAST_PARAMS);

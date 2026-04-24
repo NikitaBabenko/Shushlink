@@ -10,6 +10,7 @@ const CSP = [
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
+  "require-trusted-types-for 'script'",
 ].join('; ');
 
 function injectCsp(): Plugin {

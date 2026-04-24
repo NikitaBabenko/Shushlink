@@ -8,6 +8,10 @@ const KEY_LEN = 32;
 const TAG_LEN_BITS = 128;
 const GCM_TAG_BYTES = 16;
 
+const MAX_MEMORY_KIB = 0xffff;
+const MAX_ITERATIONS = 10;
+const MAX_PARALLELISM = 4;
+
 export interface KdfParams {
   memorySize: number;
   iterations: number;
@@ -56,6 +60,9 @@ function unpackHeader(h: Uint8Array): KdfParams {
   const parallelism = h[3];
   if (memorySize === 0 || iterations === 0 || parallelism === 0) {
     throw new Error('invalid kdf params');
+  }
+  if (memorySize > MAX_MEMORY_KIB || iterations > MAX_ITERATIONS || parallelism > MAX_PARALLELISM) {
+    throw new Error('kdf params exceed safe upper bound');
   }
   return { memorySize, iterations, parallelism };
 }
