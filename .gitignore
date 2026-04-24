@@ -3,3 +3,9 @@ dist
 .DS_Store
 *.log
 .vite
+
+# Editor / tooling local state
+.claude/
+.idea/
+.vscode/
+*.swp
