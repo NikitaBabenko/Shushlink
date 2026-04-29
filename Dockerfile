@@ -2,7 +2,11 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# `npm ci` is faster + reproducible when package-lock.json matches package.json,
+# but real-world repos often have lockfile drift (added a dep without committing
+# the lock update, etc.). Falling back to `npm install` keeps the build resilient
+# without sacrificing the happy-path performance.
+RUN npm ci || npm install
 COPY . .
 RUN npm run build
 
