@@ -10,13 +10,15 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "gen:icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "hash-wasm": "^4.11.0",
     "qrcode-generator": "^1.4.4"
   },
   "devDependencies": {
+    "sharp": "^0.33.5",
     "typescript": "^5.4.5",
     "vite": "^5.2.11",
     "vite-plugin-singlefile": "^2.3.3",

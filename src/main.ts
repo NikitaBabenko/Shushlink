@@ -5,6 +5,21 @@ import { renderDecryptView } from './ui/decrypt-view';
 import { t } from './i18n';
 import { el } from './ui/components';
 
+function renderBrand(root: HTMLElement): void {
+  root.className = 'brand';
+  root.appendChild(
+    el('img', {
+      class: 'brand-mark',
+      src: './icon-192.png',
+      alt: '',
+      width: 40,
+      height: 40,
+    })
+  );
+  root.appendChild(el('span', {}, ['Shushlink']));
+  root.appendChild(el('span', { class: 'brand-tag' }, ['zero-knowledge']));
+}
+
 function renderFooter(root: HTMLElement): void {
   const link = (href: string, label: string) =>
     el('a', { href, target: '_blank', rel: 'noopener noreferrer' }, [label]);
@@ -37,9 +52,12 @@ function bustFrame(): boolean {
 function bootstrap(): void {
   if (bustFrame()) return;
 
+  const brand = document.getElementById('brand');
   const app = document.getElementById('app');
   const footer = document.getElementById('footer');
-  if (!app || !footer) throw new Error('missing root nodes');
+  if (!brand || !app || !footer) throw new Error('missing root nodes');
+
+  renderBrand(brand);
 
   if (hasFragmentPayload()) renderDecryptView(app);
   else renderEncryptView(app);
