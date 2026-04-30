@@ -19,9 +19,51 @@ const sizes = [
 
 await mkdir(publicDir, { recursive: true });
 
+// Detect bounds of the white rounded-square plate by scanning for rows/columns
+// where MANY (>5%) pixels are very bright — that filters out stray near-white
+// pixels (watermarks, AI sparkles) and only counts the actual plate.
+const srcMeta = await sharp(source).metadata();
+const W = srcMeta.width;
+const H = srcMeta.height;
+const { data, info } = await sharp(source).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+const stride = info.channels;
+const BRIGHT = 200;
+const MIN_RUN = Math.floor(W * 0.05);
+
+const rowBrightCount = new Int32Array(H);
+const colBrightCount = new Int32Array(W);
+for (let y = 0; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * stride;
+    if ((data[i] + data[i + 1] + data[i + 2]) / 3 > BRIGHT) {
+      rowBrightCount[y]++;
+      colBrightCount[x]++;
+    }
+  }
+}
+let top = 0, bottom = H - 1, left = 0, right = W - 1;
+for (let y = 0; y < H; y++) if (rowBrightCount[y] > MIN_RUN) { top = y; break; }
+for (let y = H - 1; y >= 0; y--) if (rowBrightCount[y] > MIN_RUN) { bottom = y; break; }
+for (let x = 0; x < W; x++) if (colBrightCount[x] > MIN_RUN) { left = x; break; }
+for (let x = W - 1; x >= 0; x--) if (colBrightCount[x] > MIN_RUN) { right = x; break; }
+
+// Square the bbox around its center, then inset slightly to drop the
+// rounded-corner antialias band that still leaks dark pixels.
+const INSET = 14;
+const cx = (left + right) / 2, cy = (top + bottom) / 2;
+const half = Math.max(right - left, bottom - top) / 2 - INSET;
+const cropLeft = Math.max(0, Math.round(cx - half));
+const cropTop = Math.max(0, Math.round(cy - half));
+const cropSize = Math.min(W - cropLeft, H - cropTop, Math.round(half * 2));
+console.log(`source: ${W}x${H}, plate bbox (${left}, ${top})-(${right}, ${bottom}) → cropped to ${cropSize}x${cropSize} at (${cropLeft}, ${cropTop})`);
+
+const trimmed = await sharp(source)
+  .extract({ left: cropLeft, top: cropTop, width: cropSize, height: cropSize })
+  .toBuffer();
+
 for (const { name, size } of sizes) {
   const out = resolve(publicDir, name);
-  await sharp(source)
+  await sharp(trimmed)
     .resize(size, size, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
     .png({ compressionLevel: 9, palette: false })
     .toFile(out);
