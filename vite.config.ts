@@ -3,7 +3,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 
 const CSP = [
   "default-src 'none'",
-  "script-src 'unsafe-inline'",
+  "script-src 'unsafe-inline' 'wasm-unsafe-eval'",
   "style-src 'unsafe-inline'",
   "img-src 'self' data:",
   "connect-src 'none'",
