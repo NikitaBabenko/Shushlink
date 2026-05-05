@@ -9,6 +9,7 @@ const dict: Record<Lang, Record<string, string>> = {
     'encrypt.password.label': 'Password',
     'encrypt.password.placeholder': 'Password',
     'encrypt.password.auto': 'Auto-generate a strong password',
+    'encrypt.password.regenerate': 'Regenerate password',
     'encrypt.button': 'Create link',
     'encrypt.working': 'Encrypting…',
     'encrypt.result.title': 'Your encrypted link is ready',

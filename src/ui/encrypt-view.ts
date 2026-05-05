@@ -27,6 +27,21 @@ export function renderEncryptView(root: HTMLElement): void {
     class: 'field',
   });
 
+  const regenBtn = el(
+    'button',
+    {
+      type: 'button',
+      class: 'toggle-pw',
+      title: t('encrypt.password.regenerate'),
+      'aria-label': t('encrypt.password.regenerate'),
+    },
+    ['🎲']
+  );
+  regenBtn.addEventListener('click', () => {
+    passwordInput.value = generatePassword(24);
+  });
+  const passwordRow = el('div', { class: 'row row-tight' }, [passwordInput, regenBtn]);
+
   const autoCheckbox = el('input', {
     id: 'auto',
     type: 'checkbox',
@@ -38,11 +53,13 @@ export function renderEncryptView(root: HTMLElement): void {
       passwordInput.value = generatePassword(24);
       passwordInput.readOnly = true;
       passwordInput.classList.add('field-readonly');
+      regenBtn.classList.remove('hidden');
     } else {
       passwordInput.readOnly = false;
       passwordInput.classList.remove('field-readonly');
       if (passwordInput.value && passwordInput.value.length === 24) passwordInput.value = '';
       passwordInput.focus();
+      regenBtn.classList.add('hidden');
     }
   };
   autoCheckbox.addEventListener('change', refreshAutoState);
@@ -96,7 +113,7 @@ export function renderEncryptView(root: HTMLElement): void {
       secret,
       counter,
       el('label', { class: 'label', htmlFor: 'password' }, [t('encrypt.password.label')]),
-      passwordInput,
+      passwordRow,
       el('label', { class: 'check' }, [
         autoCheckbox,
         el('span', {}, [t('encrypt.password.auto')]),
