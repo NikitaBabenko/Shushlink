@@ -6,6 +6,7 @@ const CSP = [
   "script-src 'unsafe-inline' 'wasm-unsafe-eval'",
   "style-src 'unsafe-inline'",
   "img-src 'self' data:",
+  "manifest-src 'self'",
   "connect-src 'none'",
   "base-uri 'none'",
   "form-action 'none'",
